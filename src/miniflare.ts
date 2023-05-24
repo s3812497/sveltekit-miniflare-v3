@@ -1,16 +1,10 @@
 import { Miniflare } from 'miniflare';
 
-export async function get_dev_platform() {
-	const mf = new Miniflare({
-		kvNamespaces: ['KV'],
-		kvPersist: true,
-		modules: true,
-		scriptPath: 'src/worker.js'
-	});
+async function KVNamespace(mf: Miniflare, namespace: string) {
+	const base_url = new URL(await mf.ready);
+	base_url.searchParams.set('namespace', namespace);
 
-	const base_url = await mf.ready;
-
-	const KV = {
+	return {
 		get: async (key: string) => {
 			const url = new URL(base_url);
 			url.searchParams.set('key', key);
@@ -23,11 +17,25 @@ export async function get_dev_platform() {
 			await mf.dispatchFetch(url, { method: 'PUT', body: value });
 			return;
 		}
-	};
+	} as KVNamespace;
+}
+
+export async function get_dev_platform() {
+	const kvNamespaces = ['TEST_NAMESPACE1'];
+
+	const mf = new Miniflare({
+		kvNamespaces,
+		kvPersist: true,
+		modules: true,
+		scriptPath: 'src/worker.js'
+	});
+
+	const env: Record<string, KVNamespace> = {};
+	for (const kvNamespace of kvNamespaces) {
+		env[kvNamespace] = await KVNamespace(mf, kvNamespace);
+	}
 
 	return {
-		env: {
-			KV
-		}
-	} as App.Platform;
+		env
+	};
 }

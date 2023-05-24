@@ -8,13 +8,11 @@ declare global {
 		// interface Locals {}
 		// interface PageData {}
 		interface Platform {
-			env?: Env;
+			env?: {
+				TEST_NAMESPACE1: KVNamespace;
+			}
 		}
 	}
-}
-
-export interface Env {
-	KV: KVNamespace;
 }
 
 export {};
