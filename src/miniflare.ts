@@ -37,5 +37,5 @@ export async function get_dev_platform() {
 
 	return {
 		env
-	};
+	} as App.Platform;
 }
